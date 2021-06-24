@@ -1,6 +1,10 @@
 spring:
   application:
     name: team
+  datasource:
+    url: jdbc:postgresql://localhost:5432/pm_team?currentSchema=development
+    username: pm_team
+    password: pm_team
 
 server:
   port: 8082

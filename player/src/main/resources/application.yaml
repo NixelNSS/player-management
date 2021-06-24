@@ -1,6 +1,10 @@
 spring:
   application:
     name: player
+  datasource:
+    url: jdbc:postgresql://localhost:5432/pm_player?currentSchema=development
+    username: pm_player
+    password: pm_player
 
 server:
   port: 8083

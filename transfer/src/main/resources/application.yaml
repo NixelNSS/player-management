@@ -1,6 +1,10 @@
 spring:
   application:
     name: transfer
+  datasource:
+    url: jdbc:postgresql://localhost:5432/pm_transfer?currentSchema=development
+    username: pm_transfer
+    password: pm_transfer
 
 server:
   port: 8081
