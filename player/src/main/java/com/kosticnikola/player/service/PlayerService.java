@@ -20,10 +20,14 @@ public class PlayerService {
     public List<Player> getAll() {
         return playerRepository.findAll();
     }
+
+    public Player getById(Long id) {
+        return playerRepository.findById(id).orElseThrow(InvalidIDException::new);
+    }
     
     public Player create(CreatePlayerDTO playerDTO) {
         return playerRepository.save(new Player(
-                playerDTO.getUPIN(),
+                playerDTO.getUpin(),
                 playerDTO.getName(),
                 playerDTO.getDateOfBirth()
         ));
@@ -32,7 +36,7 @@ public class PlayerService {
     public Player update(UpdatePlayerDTO playerDTO) {
         Optional<Player> optionalPlayer = playerRepository.findById(playerDTO.getId());
         if (optionalPlayer.isPresent()) {
-            optionalPlayer.get().setUPIN(playerDTO.getUPIN());
+            optionalPlayer.get().setUPIN(playerDTO.getUpin());
             optionalPlayer.get().setName(playerDTO.getName());
             optionalPlayer.get().setDateOfBirth(playerDTO.getDateOfBirth());
             return playerRepository.save(optionalPlayer.get());

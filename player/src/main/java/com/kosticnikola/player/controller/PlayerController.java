@@ -38,6 +38,22 @@ public class PlayerController {
 
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful."),
+            @ApiResponse(code = 404, message = "Invalid player ID."),
+            @ApiResponse(code = 500, message = "Internal server error.")
+    })
+    @GetMapping("{id}")
+    public ResponseEntity<?> getById(@PathVariable("id") Long id) {
+        try {
+            return ResponseEntity.ok().body(this.playerService.getById(id));
+        } catch (InvalidIDException e) {
+            return ResponseEntity.notFound().build();
+        }  catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successful."),
             @ApiResponse(code = 400, message = "Invalid player name. (must be between 3 and 255 characters)"),
             @ApiResponse(code = 409, message = "Player with provided name already exists."),
             @ApiResponse(code = 500, message = "Internal server error.")
