@@ -17,10 +17,7 @@ import java.time.LocalDate;
 import java.time.LocalDateTime;
 import java.time.Period;
 import java.time.temporal.ChronoUnit;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
 
 @Service
@@ -31,7 +28,10 @@ public class TransferService {
     private RestTemplate restTemplate;
 
     public Set<Long> getAllTeamIdsByPlayerId(Long playerId) {
+        getPlayer(playerId);
         List<Transfer> transfers = transferRepository.findAllByPlayerId(playerId);
+        if (transfers.isEmpty()) return new HashSet<>();
+
         Set<Long> teamIds = transfers
                 .stream()
                 .map(Transfer::getOldTeamId)
@@ -41,20 +41,7 @@ public class TransferService {
     }
     
     public Transfer create(CreateTransferDTO transferDTO) {
-        PlayerDTO playerDTO;
-        try {
-            ResponseEntity<PlayerDTO> result = restTemplate.getForEntity(
-                    "http://localhost:8083/api/player/" + transferDTO.getPlayerId(),
-                    PlayerDTO.class
-            );
-            playerDTO = result.getBody();
-        } catch (HttpClientErrorException e) {
-            if (e.getStatusCode().equals(HttpStatus.NOT_FOUND))
-                throw new InvalidIDException();
-            else
-                throw new RuntimeException();
-        }
-        
+        PlayerDTO playerDTO = getPlayer(transferDTO.getPlayerId());
         long oldTeamId;
         Optional<Transfer> optionalTransfer = transferRepository.findFirstByPlayerIdOrderByCreatedAtDesc(playerDTO.getId());
         if (optionalTransfer.isPresent()) {
@@ -88,6 +75,21 @@ public class TransferService {
                 transferDTO.getNewTeamId(),
                 contractFee
         ));
+    }
+
+    private PlayerDTO getPlayer(Long playerId) {
+        try {
+            ResponseEntity<PlayerDTO> result = restTemplate.getForEntity(
+                    "http://localhost:8083/api/player/" + playerId,
+                    PlayerDTO.class
+            );
+            return result.getBody();
+        } catch (HttpClientErrorException e) {
+            if (e.getStatusCode().equals(HttpStatus.NOT_FOUND))
+                throw new InvalidIDException();
+            else
+                throw new RuntimeException();
+        }
     }
 
 }

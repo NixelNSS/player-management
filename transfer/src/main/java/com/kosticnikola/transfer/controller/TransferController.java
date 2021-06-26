@@ -22,12 +22,15 @@ public class TransferController {
 
     @ApiResponses(value = {
             @ApiResponse(code = 200, message = "Successful."),
+            @ApiResponse(code = 400, message = "Invalid id."),
             @ApiResponse(code = 500, message = "Internal server error.")
     })
     @GetMapping("teams/{playerId}")
     public ResponseEntity<?> getAll(@PathVariable("playerId") Long playerId) {
         try {
             return ResponseEntity.ok().body(this.transferService.getAllTeamIdsByPlayerId(playerId));
+        } catch (InvalidIDException e) {
+            return ResponseEntity.badRequest().build();
         } catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
