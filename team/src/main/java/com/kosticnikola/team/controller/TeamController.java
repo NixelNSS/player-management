@@ -38,6 +38,20 @@ public class TeamController {
     }
 
     @ApiResponses(value = {
+            @ApiResponse(code = 200, message = "Successful."),
+            @ApiResponse(code = 404, message = "Invalid team ID."),
+            @ApiResponse(code = 500, message = "Internal server error.")
+    })
+    @GetMapping("player/{playerId}")
+    public ResponseEntity<?> getPlayerTeams(@PathVariable("playerId") Long playerId) {
+        try {
+            return ResponseEntity.ok().body(this.teamService.getPlayerTeams(playerId));
+        } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @ApiResponses(value = {
             @ApiResponse(code = 204, message = "Successful."),
             @ApiResponse(code = 404, message = "Invalid team ID."),
             @ApiResponse(code = 500, message = "Internal server error.")
