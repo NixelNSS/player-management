@@ -36,9 +36,9 @@ public class TeamService {
 
     public void deleteById(Long id) {
         Optional<Team> optionalTeam = teamRepository.findById(id);
-        if (optionalTeam.isPresent())
-            teamRepository.deleteById(id);
-        throw new InvalidIDException();
+        if (!optionalTeam.isPresent())
+            throw new InvalidIDException();
+        teamRepository.deleteById(id);
     }
 
 }
