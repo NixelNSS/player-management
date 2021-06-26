@@ -20,6 +20,12 @@ public class TeamService {
     public List<Team> getAll() {
         return teamRepository.findAll();
     }
+
+    public void checkIfTeamsExist(List<Long> ids) {
+        ids.forEach(
+                id -> teamRepository.findById(id).orElseThrow(InvalidIDException::new)
+        );
+    }
     
     public Team create(CreateTeamDTO teamDTO) {
         return teamRepository.save(new Team(teamDTO.getName()));

@@ -14,6 +14,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.validation.Valid;
+import java.util.List;
 
 @RestController
 @RequestMapping("api/team")
@@ -32,6 +33,23 @@ public class TeamController {
         try {
             return ResponseEntity.ok().body(this.teamService.getAll());
         } catch (Exception e) {
+            return ResponseEntity.internalServerError().build();
+        }
+    }
+
+    @ApiResponses(value = {
+            @ApiResponse(code = 204, message = "Successful."),
+            @ApiResponse(code = 404, message = "Invalid team ID."),
+            @ApiResponse(code = 500, message = "Internal server error.")
+    })
+    @PostMapping("exist")
+    public ResponseEntity<?> checkIfTeamsExist(@RequestBody List<Long> ids) {
+        try {
+            this.teamService.checkIfTeamsExist(ids);
+            return ResponseEntity.noContent().build();
+        } catch (InvalidIDException e) {
+            return ResponseEntity.notFound().build();
+        }  catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
     }
