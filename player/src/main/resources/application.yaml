@@ -5,6 +5,8 @@ spring:
     url: jdbc:postgresql://localhost:5432/pm_player?currentSchema=development
     username: pm_player
     password: pm_player
+  liquibase:
+    change-log: classpath:db/liquibase/master.yaml
 
 server:
   port: 8083
