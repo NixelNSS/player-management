@@ -5,6 +5,8 @@ spring:
     url: jdbc:postgresql://localhost:5432/pm_transfer?currentSchema=development
     username: pm_transfer
     password: pm_transfer
+  liquibase:
+    change-log: classpath:db/liquibase/master.yaml
 
 server:
   port: 8081

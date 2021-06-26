@@ -1,0 +1,41 @@
+databaseChangeLog:
+  - changeSet:
+      id: initial_schema
+      author: Nikola Kostic
+      changes:
+        - createTable:
+            tableName: transfers
+            columns:
+              - column:
+                  name: id
+                  type: bigint
+                  autoIncrement: true
+                  constraints:
+                    nullable: false
+                    primaryKey: true
+                    primaryKeyName: PK_TRANSFER
+              - column:
+                  name: created_at
+                  type: timestamp
+                  constraints:
+                    nullable: false
+              - column:
+                  name: player_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: old_team_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: new_team_id
+                  type: bigint
+                  constraints:
+                    nullable: false
+              - column:
+                  name: contract_fee
+                  type: real
+                  constraints:
+                    nullable: false
