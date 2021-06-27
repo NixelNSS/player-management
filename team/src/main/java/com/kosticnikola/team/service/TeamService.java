@@ -12,7 +12,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
-import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -31,10 +30,9 @@ public class TeamService {
     public List<Team> getPlayerTeams(Long playerId) {
         try {
             ResponseEntity<Long[]> result = restTemplate.getForEntity(
-                    "http://localhost:8081/api/transfer/teams/" + playerId,
+                    "http://transfer/api/transfer/teams/" + playerId,
                     Long[].class
             );
-//            if (teams.isEmpty()) return new ArrayList<>();
             return teamRepository.findAllById(Arrays.asList(result.getBody()));
         } catch (HttpClientErrorException e) {
             if (e.getStatusCode().equals(HttpStatus.NOT_FOUND))

@@ -53,7 +53,7 @@ public class TransferService {
             oldTeamId = transferDTO.getNewTeamId();
 
         if (!restTemplate.postForEntity(
-                "http://localhost:8082/api/team/exist",
+                "http://team/api/team/exist",
                 Arrays.asList(transferDTO.getNewTeamId(), oldTeamId),
                 Void.class)
                     .getStatusCode()
@@ -80,7 +80,7 @@ public class TransferService {
     private PlayerDTO getPlayer(Long playerId) {
         try {
             ResponseEntity<PlayerDTO> result = restTemplate.getForEntity(
-                    "http://localhost:8083/api/player/" + playerId,
+                    "http://player/api/player/" + playerId,
                     PlayerDTO.class
             );
             return result.getBody();
