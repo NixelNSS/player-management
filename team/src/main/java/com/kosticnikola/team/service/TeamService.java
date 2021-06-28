@@ -6,7 +6,6 @@ import com.kosticnikola.team.dto.CreateTeamDTO;
 import com.kosticnikola.team.dto.UpdateTeamDTO;
 import com.kosticnikola.team.exception.InvalidIDException;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.web.client.HttpClientErrorException;
@@ -34,11 +33,10 @@ public class TeamService {
                     Long[].class
             );
             return teamRepository.findAllById(Arrays.asList(result.getBody()));
+        } catch (HttpClientErrorException.NotFound e) {
+            throw new InvalidIDException();
         } catch (HttpClientErrorException e) {
-            if (e.getStatusCode().equals(HttpStatus.NOT_FOUND))
-                throw new InvalidIDException();
-            else
-                throw new RuntimeException();
+            throw new RuntimeException();
         }
     }
 

@@ -46,7 +46,9 @@ public class TeamController {
     public ResponseEntity<?> getPlayerTeams(@PathVariable("playerId") Long playerId) {
         try {
             return ResponseEntity.ok().body(this.teamService.getPlayerTeams(playerId));
-        } catch (Exception e) {
+        } catch (InvalidIDException e) {
+            return ResponseEntity.notFound().build();
+        }  catch (Exception e) {
             return ResponseEntity.internalServerError().build();
         }
     }
