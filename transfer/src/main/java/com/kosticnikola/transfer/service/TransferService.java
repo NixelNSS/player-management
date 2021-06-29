@@ -32,12 +32,9 @@ public class TransferService {
         List<Transfer> transfers = transferRepository.findAllByPlayerId(playerId);
         if (transfers.isEmpty()) return new HashSet<>();
 
-        Set<Long> teamIds = transfers
-                .stream()
-                .map(Transfer::getOldTeamId)
+        return transfers.stream()
+                .map(Transfer::getNewTeamId)
                 .collect(Collectors.toSet());
-        teamIds.add(transfers.get(transfers.size() - 1).getNewTeamId());
-        return teamIds;
     }
     
     public Transfer create(CreateTransferDTO transferDTO) {
@@ -65,7 +62,9 @@ public class TransferService {
         if (optionalTransfer.isPresent())
             months = ChronoUnit.MONTHS.between(optionalTransfer.get().getCreatedAt().toLocalDateTime(), LocalDateTime.now());
 
-        double transferFee = months * 100000 / Period.between(playerDTO.getDateOfBirth(), LocalDate.now()).getYears();
+        int period = Period.between(playerDTO.getDateOfBirth(), LocalDate.now()).getYears();
+        if (period == 0) period = 1;
+        double transferFee = months * 100000 / period;
         double contractFee = transferFee + transferFee * transferDTO.getCommission() / 100;
 
         return transferRepository.save(new Transfer(
@@ -84,11 +83,10 @@ public class TransferService {
                     PlayerDTO.class
             );
             return result.getBody();
+        } catch (HttpClientErrorException.NotFound e) {
+            throw new InvalidIDException();
         } catch (HttpClientErrorException e) {
-            if (e.getStatusCode().equals(HttpStatus.NOT_FOUND))
-                throw new InvalidIDException();
-            else
-                throw new RuntimeException();
+            throw new RuntimeException();
         }
     }
 
