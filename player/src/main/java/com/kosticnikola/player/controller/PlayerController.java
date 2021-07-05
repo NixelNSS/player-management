@@ -2,13 +2,10 @@ package com.kosticnikola.player.controller;
 
 import com.kosticnikola.player.dto.CreatePlayerDTO;
 import com.kosticnikola.player.dto.UpdatePlayerDTO;
-import com.kosticnikola.player.exception.InvalidIDException;
 import com.kosticnikola.player.service.PlayerService;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.AllArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -29,11 +26,7 @@ public class PlayerController {
     })
     @GetMapping("")
     public ResponseEntity<?> getAll() {
-        try {
-            return ResponseEntity.ok().body(this.playerService.getAll());
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+        return ResponseEntity.ok().body(this.playerService.getAll());
     }
 
     @ApiResponses(value = {
@@ -43,13 +36,7 @@ public class PlayerController {
     })
     @GetMapping("{id}")
     public ResponseEntity<?> getById(@PathVariable("id") Long id) {
-        try {
-            return ResponseEntity.ok().body(this.playerService.getById(id));
-        } catch (InvalidIDException e) {
-            return ResponseEntity.notFound().build();
-        }  catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+        return ResponseEntity.ok().body(this.playerService.getById(id));
     }
 
     @ApiResponses(value = {
@@ -60,13 +47,7 @@ public class PlayerController {
     })
     @PostMapping("")
     public ResponseEntity<?> create(@Valid @RequestBody CreatePlayerDTO createPlayerDTO) {
-        try {
-            return ResponseEntity.ok().body(this.playerService.create(createPlayerDTO));
-        } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+        return ResponseEntity.ok().body(this.playerService.create(createPlayerDTO));
     }
 
     @ApiResponses(value = {
@@ -78,15 +59,7 @@ public class PlayerController {
     })
     @PutMapping("")
     public ResponseEntity<?> update(@Valid @RequestBody UpdatePlayerDTO updatePlayerDTO) {
-        try {
-            return ResponseEntity.ok().body(this.playerService.update(updatePlayerDTO));
-        } catch (InvalidIDException e) {
-            return ResponseEntity.notFound().build();
-        } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+        return ResponseEntity.ok().body(this.playerService.update(updatePlayerDTO));
     }
 
     @ApiResponses(value = {
@@ -96,14 +69,8 @@ public class PlayerController {
     })
     @DeleteMapping("{id}")
     public ResponseEntity<?> deleteById(@PathVariable("id") Long id) {
-        try {
-            this.playerService.deleteById(id);
-            return ResponseEntity.noContent().build();
-        } catch (InvalidIDException e) {
-            return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+        this.playerService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
 }

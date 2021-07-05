@@ -8,7 +8,6 @@ import com.kosticnikola.team.exception.InvalidIDException;
 import lombok.AllArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.util.Arrays;
@@ -27,17 +26,11 @@ public class TeamService {
     }
 
     public List<Team> getPlayerTeams(Long playerId) {
-        try {
-            ResponseEntity<Long[]> result = restTemplate.getForEntity(
-                    "http://transfer/api/transfer/teams/" + playerId,
-                    Long[].class
-            );
-            return teamRepository.findAllById(Arrays.asList(result.getBody()));
-        } catch (HttpClientErrorException.NotFound e) {
-            throw new InvalidIDException();
-        } catch (HttpClientErrorException e) {
-            throw new RuntimeException();
-        }
+        ResponseEntity<Long[]> result = restTemplate.getForEntity(
+                "http://transfer/api/transfer/teams/" + playerId,
+                Long[].class
+        );
+        return teamRepository.findAllById(Arrays.asList(result.getBody()));
     }
 
     public void checkIfTeamsExist(List<Long> ids) {

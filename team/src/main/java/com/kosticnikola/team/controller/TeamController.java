@@ -1,14 +1,11 @@
 package com.kosticnikola.team.controller;
 
-import com.kosticnikola.team.exception.InvalidIDException;
 import com.kosticnikola.team.service.TeamService;
 import com.kosticnikola.team.dto.CreateTeamDTO;
 import com.kosticnikola.team.dto.UpdateTeamDTO;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
 import lombok.AllArgsConstructor;
-import org.springframework.dao.DataIntegrityViolationException;
-import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -30,11 +27,7 @@ public class TeamController {
     })
     @GetMapping("")
     public ResponseEntity<?> getAll() {
-        try {
-            return ResponseEntity.ok().body(this.teamService.getAll());
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+        return ResponseEntity.ok().body(this.teamService.getAll());
     }
 
     @ApiResponses(value = {
@@ -44,13 +37,7 @@ public class TeamController {
     })
     @GetMapping("player/{playerId}")
     public ResponseEntity<?> getPlayerTeams(@PathVariable("playerId") Long playerId) {
-        try {
-            return ResponseEntity.ok().body(this.teamService.getPlayerTeams(playerId));
-        } catch (InvalidIDException e) {
-            return ResponseEntity.notFound().build();
-        }  catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+        return ResponseEntity.ok().body(this.teamService.getPlayerTeams(playerId));
     }
 
     @ApiResponses(value = {
@@ -60,14 +47,8 @@ public class TeamController {
     })
     @PostMapping("exist")
     public ResponseEntity<?> checkIfTeamsExist(@RequestBody List<Long> ids) {
-        try {
-            this.teamService.checkIfTeamsExist(ids);
-            return ResponseEntity.noContent().build();
-        } catch (InvalidIDException e) {
-            return ResponseEntity.notFound().build();
-        }  catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+        this.teamService.checkIfTeamsExist(ids);
+        return ResponseEntity.noContent().build();
     }
 
     @ApiResponses(value = {
@@ -78,13 +59,7 @@ public class TeamController {
     })
     @PostMapping("")
     public ResponseEntity<?> create(@Valid @RequestBody CreateTeamDTO createTeamDTO) {
-        try {
-            return ResponseEntity.ok().body(this.teamService.create(createTeamDTO));
-        } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+        return ResponseEntity.ok().body(this.teamService.create(createTeamDTO));
     }
 
     @ApiResponses(value = {
@@ -96,15 +71,7 @@ public class TeamController {
     })
     @PutMapping("")
     public ResponseEntity<?> update(@Valid @RequestBody UpdateTeamDTO updateTeamDTO) {
-        try {
-            return ResponseEntity.ok().body(this.teamService.update(updateTeamDTO));
-        } catch (InvalidIDException e) {
-            return ResponseEntity.notFound().build();
-        } catch (DataIntegrityViolationException e) {
-            return ResponseEntity.status(HttpStatus.CONFLICT).build();
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+        return ResponseEntity.ok().body(this.teamService.update(updateTeamDTO));
     }
 
     @ApiResponses(value = {
@@ -114,14 +81,8 @@ public class TeamController {
     })
     @DeleteMapping("{id}")
     public ResponseEntity<?> deleteById(@PathVariable("id") Long id) {
-        try {
-            this.teamService.deleteById(id);
-            return ResponseEntity.noContent().build();
-        } catch (InvalidIDException e) {
-            return ResponseEntity.notFound().build();
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+        this.teamService.deleteById(id);
+        return ResponseEntity.noContent().build();
     }
 
 }

@@ -9,7 +9,6 @@ import lombok.AllArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.HttpClientErrorException;
 import org.springframework.web.client.RestTemplate;
 
 import java.sql.Timestamp;
@@ -77,17 +76,11 @@ public class TransferService {
     }
 
     private PlayerDTO getPlayer(Long playerId) {
-        try {
-            ResponseEntity<PlayerDTO> result = restTemplate.getForEntity(
-                    "http://player/api/player/" + playerId,
-                    PlayerDTO.class
-            );
-            return result.getBody();
-        } catch (HttpClientErrorException.NotFound e) {
-            throw new InvalidIDException();
-        } catch (HttpClientErrorException e) {
-            throw new RuntimeException();
-        }
+        ResponseEntity<PlayerDTO> result = restTemplate.getForEntity(
+                "http://player/api/player/" + playerId,
+                PlayerDTO.class
+        );
+        return result.getBody();
     }
 
 }

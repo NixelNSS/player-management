@@ -1,7 +1,6 @@
 package com.kosticnikola.transfer.controller;
 
 import com.kosticnikola.transfer.dto.CreateTransferDTO;
-import com.kosticnikola.transfer.exception.InvalidIDException;
 import com.kosticnikola.transfer.service.TransferService;
 import io.swagger.annotations.ApiResponse;
 import io.swagger.annotations.ApiResponses;
@@ -27,13 +26,7 @@ public class TransferController {
     })
     @GetMapping("teams/{playerId}")
     public ResponseEntity<?> getAll(@PathVariable("playerId") Long playerId) {
-        try {
-            return ResponseEntity.ok().body(this.transferService.getAllTeamIdsByPlayerId(playerId));
-        } catch (InvalidIDException e) {
-            return ResponseEntity.badRequest().build();
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+        return ResponseEntity.ok().body(this.transferService.getAllTeamIdsByPlayerId(playerId));
     }
 
     @ApiResponses(value = {
@@ -43,13 +36,7 @@ public class TransferController {
     })
     @PostMapping("")
     public ResponseEntity<?> create(@Valid @RequestBody CreateTransferDTO createTransferDTO) {
-        try {
-            return ResponseEntity.ok().body(this.transferService.create(createTransferDTO));
-        } catch (InvalidIDException e) {
-            return ResponseEntity.badRequest().build();
-        } catch (Exception e) {
-            return ResponseEntity.internalServerError().build();
-        }
+        return ResponseEntity.ok().body(this.transferService.create(createTransferDTO));
     }
 
 }
