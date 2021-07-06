@@ -5,6 +5,7 @@ import com.kosticnikola.team.dto.UpdateTeamDTO;
 import com.kosticnikola.team.entity.Team;
 import com.kosticnikola.team.exception.InvalidIDException;
 import com.kosticnikola.team.repository.TeamRepository;
+import com.kosticnikola.team.restclient.TransferClient;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
@@ -12,11 +13,8 @@ import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.mockito.MockitoAnnotations;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.HttpClientErrorException;
-import org.springframework.web.client.RestTemplate;
 
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
@@ -29,7 +27,7 @@ class TeamServiceTest {
     TeamRepository teamRepository;
 
     @Mock
-    RestTemplate restTemplate;
+    TransferClient transferClient;
 
     @InjectMocks
     TeamService teamService;
@@ -56,23 +54,12 @@ class TeamServiceTest {
     }
 
     @Test
-    void getPlayerTeams_ShouldReturnAListOfTeams_IfAnAPIResponseStatusCodeIs200() {
+    void getPlayerTeams_ShouldReturnAListOfTeams_IfATransferClientReturnedAListOfIds() {
         setUpTeams();
-        Mockito.when(restTemplate.getForEntity(Mockito.anyString(), Mockito.eq(Long[].class)))
-          .thenReturn(new ResponseEntity<>(new Long[]{1L, 2L}, HttpStatus.OK));
-        Mockito.when(teamRepository.findAllById(Mockito.anyIterable())).thenReturn(teams);
+        Mockito.when(transferClient.getPlayerTeams(Mockito.anyLong())).thenReturn(new ArrayList<>());
+        Mockito.when(teamRepository.findAllById(Mockito.any())).thenReturn(teams);
 
         Assertions.assertEquals(teams, teamService.getPlayerTeams(1L));
-    }
-
-    @Test
-    void getPlayerTeams_ShouldThrowARuntimeException_IfAnHttpClientErrorExceptionIsThrown() {
-        Mockito.when(restTemplate.getForEntity(Mockito.anyString(), Mockito.any()))
-                .thenThrow(HttpClientErrorException.class);
-        Assertions.assertThrows(
-                RuntimeException.class,
-                () -> teamService.getPlayerTeams(1L)
-        );
     }
 
     @Test

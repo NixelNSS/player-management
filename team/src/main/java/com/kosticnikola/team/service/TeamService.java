@@ -5,12 +5,10 @@ import com.kosticnikola.team.repository.TeamRepository;
 import com.kosticnikola.team.dto.CreateTeamDTO;
 import com.kosticnikola.team.dto.UpdateTeamDTO;
 import com.kosticnikola.team.exception.InvalidIDException;
+import com.kosticnikola.team.restclient.TransferClient;
 import lombok.AllArgsConstructor;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
-import java.util.Arrays;
 import java.util.List;
 import java.util.Optional;
 
@@ -19,18 +17,14 @@ import java.util.Optional;
 public class TeamService {
     
     private TeamRepository teamRepository;
-    private RestTemplate restTemplate;
+    private TransferClient transferClient;
 
     public List<Team> getAll() {
         return teamRepository.findAll();
     }
 
     public List<Team> getPlayerTeams(Long playerId) {
-        ResponseEntity<Long[]> result = restTemplate.getForEntity(
-                "http://transfer/api/transfer/teams/" + playerId,
-                Long[].class
-        );
-        return teamRepository.findAllById(Arrays.asList(result.getBody()));
+        return teamRepository.findAllById(transferClient.getPlayerTeams(playerId));
     }
 
     public void checkIfTeamsExist(List<Long> ids) {

@@ -5,11 +5,10 @@ import com.kosticnikola.transfer.dto.PlayerDTO;
 import com.kosticnikola.transfer.entity.Transfer;
 import com.kosticnikola.transfer.exception.InvalidIDException;
 import com.kosticnikola.transfer.repository.TransferRepository;
+import com.kosticnikola.transfer.restclient.PlayerClient;
+import com.kosticnikola.transfer.restclient.TeamClient;
 import lombok.AllArgsConstructor;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
-import org.springframework.web.client.RestTemplate;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -24,10 +23,11 @@ import java.util.stream.Collectors;
 public class TransferService {
     
     private TransferRepository transferRepository;
-    private RestTemplate restTemplate;
+    private PlayerClient playerClient;
+    private TeamClient teamClient;
 
     public Set<Long> getAllTeamIdsByPlayerId(Long playerId) {
-        getPlayer(playerId);
+        playerClient.getPlayerTeams(playerId);
         List<Transfer> transfers = transferRepository.findAllByPlayerId(playerId);
         if (transfers.isEmpty()) return new HashSet<>();
 
@@ -37,7 +37,7 @@ public class TransferService {
     }
     
     public Transfer create(CreateTransferDTO transferDTO) {
-        PlayerDTO playerDTO = getPlayer(transferDTO.getPlayerId());
+        PlayerDTO playerDTO = playerClient.getPlayerTeams(transferDTO.getPlayerId());
         long oldTeamId;
         Optional<Transfer> optionalTransfer = transferRepository.findFirstByPlayerIdOrderByCreatedAtDesc(playerDTO.getId());
         if (optionalTransfer.isPresent()) {
@@ -48,13 +48,7 @@ public class TransferService {
         else
             oldTeamId = transferDTO.getNewTeamId();
 
-        if (!restTemplate.postForEntity(
-                "http://team/api/team/exist",
-                Arrays.asList(transferDTO.getNewTeamId(), oldTeamId),
-                Void.class)
-                    .getStatusCode()
-                    .equals(HttpStatus.NO_CONTENT))
-            throw new InvalidIDException();
+        teamClient.checkIfTeamsExist(Arrays.asList(transferDTO.getNewTeamId(), oldTeamId));
 
         long months = 0;
         optionalTransfer = transferRepository.findFirstByPlayerIdOrderByCreatedAtAsc(playerDTO.getId());
@@ -73,14 +67,6 @@ public class TransferService {
                 transferDTO.getNewTeamId(),
                 contractFee
         ));
-    }
-
-    private PlayerDTO getPlayer(Long playerId) {
-        ResponseEntity<PlayerDTO> result = restTemplate.getForEntity(
-                "http://player/api/player/" + playerId,
-                PlayerDTO.class
-        );
-        return result.getBody();
     }
 
 }

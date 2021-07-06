@@ -5,13 +5,12 @@ import com.kosticnikola.transfer.dto.PlayerDTO;
 import com.kosticnikola.transfer.entity.Transfer;
 import com.kosticnikola.transfer.exception.InvalidIDException;
 import com.kosticnikola.transfer.repository.TransferRepository;
+import com.kosticnikola.transfer.restclient.PlayerClient;
+import com.kosticnikola.transfer.restclient.TeamClient;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.mockito.*;
-import org.springframework.http.HttpStatus;
-import org.springframework.http.ResponseEntity;
-import org.springframework.web.client.RestTemplate;
 
 import java.sql.Timestamp;
 import java.time.LocalDate;
@@ -25,7 +24,10 @@ class TransferServiceTest {
     TransferRepository transferRepository;
 
     @Mock
-    RestTemplate restTemplate;
+    PlayerClient playerClient;
+
+    @Mock
+    TeamClient teamClient;
 
     @InjectMocks
     TransferService transferService;
@@ -38,8 +40,7 @@ class TransferServiceTest {
     @Test
     void getAllTeamIdsByPlayerId_ShouldReturnAnEmptySet_IfTransferRepositoryReturnedAnEmptyList() {
         PlayerDTO dto = new PlayerDTO(1L, 123L, "Peter", LocalDate.now());
-        Mockito.when(restTemplate.getForEntity(Mockito.anyString(), Mockito.eq(PlayerDTO.class)))
-                .thenReturn(new ResponseEntity<>(dto, HttpStatus.OK));
+        Mockito.when(playerClient.getPlayerTeams(Mockito.anyLong())).thenReturn(dto);
         Mockito.when(transferRepository.findAllByPlayerId(Mockito.anyLong()))
                 .thenReturn(new ArrayList<>());
 
@@ -58,8 +59,7 @@ class TransferServiceTest {
                 new Transfer(3L, 1L)
         );
         PlayerDTO dto = new PlayerDTO(1L, 123L, "Peter", LocalDate.now());
-        Mockito.when(restTemplate.getForEntity(Mockito.anyString(), Mockito.eq(PlayerDTO.class)))
-                .thenReturn(new ResponseEntity<>(dto, HttpStatus.OK));
+        Mockito.when(playerClient.getPlayerTeams(Mockito.anyLong())).thenReturn(dto);
         Mockito.when(transferRepository.findAllByPlayerId(Mockito.anyLong()))
                 .thenReturn(list);
 
@@ -72,8 +72,7 @@ class TransferServiceTest {
     @Test
     void create_ShouldThrowAnInvalidIDException_IfTheLastTransferNewTeamIdEqualsProvidedNewTeamId() {
         PlayerDTO dto = new PlayerDTO(1L, 123L, "Peter", LocalDate.now());
-        Mockito.when(restTemplate.getForEntity(Mockito.anyString(), Mockito.eq(PlayerDTO.class)))
-                .thenReturn(new ResponseEntity<>(dto, HttpStatus.OK));
+        Mockito.when(playerClient.getPlayerTeams(Mockito.anyLong())).thenReturn(dto);
         Mockito.when(transferRepository.findFirstByPlayerIdOrderByCreatedAtDesc(Mockito.anyLong()))
                 .thenReturn(Optional.of(new Transfer(1L, 1L)));
 
@@ -84,30 +83,12 @@ class TransferServiceTest {
     }
 
     @Test
-    void create_ShouldThrowAnInvalidIDException_IfTeamAPIDidNotReturnAStatusCode204() {
-        PlayerDTO dto = new PlayerDTO(1L, 123L, "Peter", LocalDate.now());
-        Mockito.when(restTemplate.getForEntity(Mockito.anyString(), Mockito.eq(PlayerDTO.class)))
-                .thenReturn(new ResponseEntity<>(dto, HttpStatus.OK));
-        Mockito.when(transferRepository.findFirstByPlayerIdOrderByCreatedAtDesc(Mockito.anyLong()))
-                .thenReturn(Optional.of(new Transfer(1L, Long.MAX_VALUE)));
-        Mockito.when(restTemplate.postForEntity(Mockito.anyString(), Mockito.anyList(), Mockito.eq(Void.class)))
-                .thenReturn(new ResponseEntity<>(HttpStatus.NOT_FOUND));
-
-        Assertions.assertThrows(
-                InvalidIDException.class,
-                () -> transferService.create(new CreateTransferDTO(1L, 1L, 5))
-        );
-    }
-
-    @Test
     void create_ShouldSaveATransferObjectWithContractFeeEquals0_IfTransferRepositoryFindFirstAscMethodReturnedAnEmptyOptional() {
         PlayerDTO dto = new PlayerDTO(1L, 123L, "Peter", LocalDate.now());
-        Mockito.when(restTemplate.getForEntity(Mockito.anyString(), Mockito.eq(PlayerDTO.class)))
-                .thenReturn(new ResponseEntity<>(dto, HttpStatus.OK));
+        Mockito.when(playerClient.getPlayerTeams(Mockito.anyLong())).thenReturn(dto);
         Mockito.when(transferRepository.findFirstByPlayerIdOrderByCreatedAtDesc(Mockito.anyLong()))
                 .thenReturn(Optional.of(new Transfer(Long.MAX_VALUE, Long.MAX_VALUE)));
-        Mockito.when(restTemplate.postForEntity(Mockito.anyString(), Mockito.anyList(), Mockito.eq(Void.class)))
-                .thenReturn(new ResponseEntity<>(HttpStatus.NO_CONTENT));
+        Mockito.when(teamClient.checkIfTeamsExist(Mockito.anyList())).thenReturn(new Object());
         Mockito.when(transferRepository.findFirstByPlayerIdOrderByCreatedAtAsc(Mockito.anyLong()))
                 .thenReturn(Optional.empty());
 
@@ -121,12 +102,10 @@ class TransferServiceTest {
     @Test
     void create_ShouldSaveATransferObjectWithOldTeamIdEqualsNewTeamId_IfTransferRepositoryFindFirstByPlayerIdOrderByCreatedAtDescReturnedAnEmptyOptional() {
         PlayerDTO dto = new PlayerDTO(1L, 123L, "Peter", LocalDate.now());
-        Mockito.when(restTemplate.getForEntity(Mockito.anyString(), Mockito.eq(PlayerDTO.class)))
-                .thenReturn(new ResponseEntity<>(dto, HttpStatus.OK));
+        Mockito.when(playerClient.getPlayerTeams(Mockito.anyLong())).thenReturn(dto);
         Mockito.when(transferRepository.findFirstByPlayerIdOrderByCreatedAtDesc(Mockito.anyLong()))
                 .thenReturn(Optional.empty());
-        Mockito.when(restTemplate.postForEntity(Mockito.anyString(), Mockito.anyList(), Mockito.eq(Void.class)))
-                .thenReturn(new ResponseEntity<>(HttpStatus.NO_CONTENT));
+        Mockito.when(teamClient.checkIfTeamsExist(Mockito.anyList())).thenReturn(new Object());
         Mockito.when(transferRepository.findFirstByPlayerIdOrderByCreatedAtAsc(Mockito.anyLong()))
                 .thenReturn(Optional.empty());
 
@@ -147,12 +126,10 @@ class TransferServiceTest {
                 1L,
                 10000D
         );
-        Mockito.when(restTemplate.getForEntity(Mockito.anyString(), Mockito.eq(PlayerDTO.class)))
-                .thenReturn(new ResponseEntity<>(dto, HttpStatus.OK));
+        Mockito.when(playerClient.getPlayerTeams(Mockito.anyLong())).thenReturn(dto);
         Mockito.when(transferRepository.findFirstByPlayerIdOrderByCreatedAtDesc(Mockito.anyLong()))
                 .thenReturn(Optional.of(new Transfer(Long.MAX_VALUE, Long.MAX_VALUE)));
-        Mockito.when(restTemplate.postForEntity(Mockito.anyString(), Mockito.anyList(), Mockito.eq(Void.class)))
-                .thenReturn(new ResponseEntity<>(HttpStatus.NO_CONTENT));
+        Mockito.when(teamClient.checkIfTeamsExist(Mockito.anyList())).thenReturn(new Object());
         Mockito.when(transferRepository.findFirstByPlayerIdOrderByCreatedAtAsc(Mockito.anyLong()))
                 .thenReturn(Optional.of(t));
 
@@ -163,6 +140,31 @@ class TransferServiceTest {
         ArgumentCaptor<Transfer> argument = ArgumentCaptor.forClass(Transfer.class);
         Mockito.verify(transferRepository).save(argument.capture());
         Assertions.assertEquals(contractFee, argument.getValue().getContractFee());
+    }
+
+    @Test
+    void create_ShouldReturnATransferObject_IfTransferRepositoryReturnedATransferObject() {
+        PlayerDTO dto = new PlayerDTO(1L, 123L, "Peter", LocalDate.now());
+        Transfer t = new Transfer(
+                Timestamp.valueOf(LocalDateTime.now()),
+                1L,
+                1L,
+                1L,
+                0D
+        );
+        Mockito.when(playerClient.getPlayerTeams(Mockito.anyLong())).thenReturn(dto);
+        Mockito.when(transferRepository.findFirstByPlayerIdOrderByCreatedAtDesc(Mockito.anyLong()))
+                .thenReturn(Optional.of(new Transfer(Long.MAX_VALUE, Long.MAX_VALUE)));
+        Mockito.when(teamClient.checkIfTeamsExist(Mockito.anyList())).thenReturn(new Object());
+        Mockito.when(transferRepository.findFirstByPlayerIdOrderByCreatedAtAsc(Mockito.anyLong()))
+                .thenReturn(Optional.of(t));
+        Mockito.when(transferRepository.save(Mockito.any(Transfer.class)))
+                .thenReturn(t);
+
+        Assertions.assertEquals(
+                t,
+                transferService.create(new CreateTransferDTO(1L, 1L, 5))
+        );
     }
 
 }
