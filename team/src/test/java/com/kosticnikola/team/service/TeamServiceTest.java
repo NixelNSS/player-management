@@ -66,16 +66,6 @@ class TeamServiceTest {
     }
 
     @Test
-    void getPlayerTeams_ShouldThrowAnInvalidIDException_IfAnHttpClientErrorExceptionNotFoundIsThrown() {
-        Mockito.when(restTemplate.getForEntity(Mockito.anyString(), Mockito.any()))
-                    .thenThrow(HttpClientErrorException.NotFound.class);
-        Assertions.assertThrows(
-                InvalidIDException.class,
-                () -> teamService.getPlayerTeams(1L)
-        );
-    }
-
-    @Test
     void getPlayerTeams_ShouldThrowARuntimeException_IfAnHttpClientErrorExceptionIsThrown() {
         Mockito.when(restTemplate.getForEntity(Mockito.anyString(), Mockito.any()))
                 .thenThrow(HttpClientErrorException.class);

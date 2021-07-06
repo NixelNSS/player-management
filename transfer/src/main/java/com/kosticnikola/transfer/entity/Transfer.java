@@ -51,4 +51,9 @@ public class Transfer {
         this.newTeamId = newTeamId;
         this.contractFee = contractFee;
     }
+
+    public Transfer(long playerId, long newTeamId) {
+        this.playerId = playerId;
+        this.newTeamId = newTeamId;
+    }
 }

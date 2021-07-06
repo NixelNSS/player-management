@@ -4,6 +4,7 @@ import com.fasterxml.jackson.databind.ObjectMapper;
 import com.kosticnikola.team.dto.CreateTeamDTO;
 import com.kosticnikola.team.dto.UpdateTeamDTO;
 import com.kosticnikola.team.entity.Team;
+import com.kosticnikola.team.exception.APIExceptionHandler;
 import com.kosticnikola.team.exception.InvalidIDException;
 import com.kosticnikola.team.service.TeamService;
 import org.junit.jupiter.api.Assertions;
@@ -42,6 +43,7 @@ class TeamControllerTest {
         MockitoAnnotations.openMocks(this);
         mockMvc = MockMvcBuilders
                 .standaloneSetup(teamController)
+                .setControllerAdvice(new APIExceptionHandler())
                 .build();
     }
 
@@ -97,10 +99,10 @@ class TeamControllerTest {
     }
 
     @Test
-    void getPlayerTeams_ShouldReturnAStatusCode404_IfAnInvalidIDExceptionIsThrown() throws Exception {
+    void getPlayerTeams_ShouldReturnAStatusCode400_IfAnInvalidIDExceptionIsThrown() throws Exception {
         Mockito.when(teamService.getPlayerTeams(Mockito.anyLong())).thenThrow(InvalidIDException.class);
         mockMvc.perform(MockMvcRequestBuilders.get("/api/team/player/1"))
-                .andExpect(status().isNotFound())
+                .andExpect(status().isBadRequest())
                 .andReturn();
     }
 
@@ -139,12 +141,12 @@ class TeamControllerTest {
     }
 
     @Test
-    void checkIfTeamsExist_ShouldReturnAStatusCode404_IfAnInvalidIDExceptionIsThrown() throws Exception {
+    void checkIfTeamsExist_ShouldReturnAStatusCode400_IfAnInvalidIDExceptionIsThrown() throws Exception {
         Mockito.doThrow(InvalidIDException.class).when(teamService).checkIfTeamsExist(Mockito.anyList());
         mockMvc.perform(MockMvcRequestBuilders.post("/api/team/exist")
                 .content(asJsonString(Arrays.asList(1L, 2L, 3L)))
                 .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
+                .andExpect(status().isBadRequest())
                 .andReturn();
     }
 
@@ -318,14 +320,14 @@ class TeamControllerTest {
     }
 
     @Test
-    void update_ShouldReturnAStatusCode404_IfAnInvalidIDExceptionIsThrown() throws Exception {
+    void update_ShouldReturnAStatusCode400_IfAnInvalidIDExceptionIsThrown() throws Exception {
         Mockito.when(teamService.update(Mockito.any(UpdateTeamDTO.class)))
                 .thenThrow(InvalidIDException.class);
         mockMvc.perform(
                 MockMvcRequestBuilders.put("/api/team")
                         .content(asJsonString(new UpdateTeamDTO(1L, "Real Madrid")))
                         .contentType(MediaType.APPLICATION_JSON))
-                .andExpect(status().isNotFound())
+                .andExpect(status().isBadRequest())
                 .andReturn();
     }
 
@@ -363,11 +365,11 @@ class TeamControllerTest {
     }
 
     @Test
-    void deleteById_ShouldReturnAStatusCode404_IfAnInvalidIDExceptionIsThrown() throws Exception{
+    void deleteById_ShouldReturnAStatusCode400_IfAnInvalidIDExceptionIsThrown() throws Exception{
         Mockito.doThrow(InvalidIDException.class).when(teamService).deleteById(Mockito.anyLong());
         mockMvc.perform(
                 MockMvcRequestBuilders.delete("/api/team/1"))
-                .andExpect(status().isNotFound())
+                .andExpect(status().isBadRequest())
                 .andReturn();
     }
 
