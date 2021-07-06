@@ -26,12 +26,7 @@ public class APIExceptionHandler {
 
     @ExceptionHandler({HttpClientErrorException.class, InvalidIDException.class})
     public ResponseEntity<?> handleInvalidIDException() {
-        return new ResponseEntity<>(new APIException("Invalid team id(s)."), HttpStatus.BAD_REQUEST);
-    }
-
-    @ExceptionHandler(HttpClientErrorException.NotFound.class)
-    public ResponseEntity<?> handleHttpClientErrorExceptionNotFound() {
-        return new ResponseEntity<>(new APIException("Invalid player id."), HttpStatus.BAD_REQUEST);
+        return new ResponseEntity<>(new APIException("Invalid team/player id(s)."), HttpStatus.BAD_REQUEST);
     }
 
     @ExceptionHandler(Exception.class)

@@ -35,11 +35,6 @@ public class APIExceptionHandler {
         return new ResponseEntity<>(new APIException("Team with provided name already exists."), HttpStatus.CONFLICT);
     }
 
-    @ExceptionHandler(HttpClientErrorException.NotFound.class)
-    public ResponseEntity<?> handleHttpClientErrorExceptionNotFound() {
-        return new ResponseEntity<>(new APIException("Invalid player id."), HttpStatus.BAD_REQUEST);
-    }
-
     @ExceptionHandler(Exception.class)
     public ResponseEntity<?> handleInternalServerErrorExceptions() {
         return new ResponseEntity<>(new APIException("Internal server error."), HttpStatus.INTERNAL_SERVER_ERROR);
